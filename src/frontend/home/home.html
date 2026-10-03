@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>FairShare - Home</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-800 antialiased flex justify-center">
+
+  <main class="w-full max-w-md min-h-screen bg-slate-50 flex flex-col justify-between shadow-2xl">
+    <!-- Header -->
+    <header class="p-4 bg-white border-b border-slate-200 flex justify-between items-center sticky top-0 z-10">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">🧾</span>
+        <h1 class="font-bold text-lg text-slate-900 tracking-tight">FairShare</h1>
+      </div>
+      <div id="user-display">
+        <a href="login.html" class="text-xs font-semibold px-3 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-full transition">
+          Sign In
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-5 flex flex-col gap-5 pt-6">
+      <div class="text-center">
+        <h2 class="text-2xl font-black text-slate-900 mb-1">Split Bills in Seconds</h2>
+        <p class="text-slate-500 text-xs">Snap a receipt, invite the table, and let everyone claim their share.</p>
+      </div>
+
+      <!-- Action Card 1: Host -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-3">
+        <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Start Here</span>
+        <h3 class="font-bold text-base text-slate-800">Hosting the Bill?</h3>
+        <p class="text-slate-500 text-xs">Upload or take a photo of the physical receipt to scan with Gemini.</p>
+        
+        <input type="file" id="camera-input" accept="image/*" capture="environment" class="hidden" onchange="handleReceiptSelected()" />
+        
+        <button onclick="document.getElementById('camera-input').click()" class="w-full py-3.5 px-4 bg-emerald-600 active:bg-emerald-700 text-white font-semibold rounded-xl text-center shadow-sm flex items-center justify-center gap-2 transition">
+          <span>📷</span> Scan Receipt
+        </button>
+      </div>
+
+      <!-- Divider -->
+      <div class="flex items-center gap-3">
+        <div class="h-px bg-slate-200 flex-1"></div>
+        <span class="text-xs text-slate-400 font-medium uppercase">or join a table</span>
+        <div class="h-px bg-slate-200 flex-1"></div>
+      </div>
+
+      <!-- Action Card 2: Guest Join -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-3">
+        <label for="room-input" class="font-bold text-sm text-slate-700">Have a 4-letter room code?</label>
+        <div class="flex gap-2">
+          <input type="text" id="room-input" placeholder="X7K2" maxlength="4" class="flex-1 uppercase px-4 py-3 border border-slate-200 rounded-xl text-center font-bold tracking-widest text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          <button onclick="joinRoom()" class="px-6 py-3 bg-slate-800 active:bg-slate-900 text-white font-semibold rounded-xl transition">
+            Join
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Navigation Footer -->
+    <footer class="p-3 bg-white border-t border-slate-200 text-center text-xs text-slate-400">
+      StormHacks Prototype • Mobile-First
+    </footer>
+  </main>
+
+  <script>
+    // Load current user profile from localStorage if present
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+      if (user && user.name) {
+        document.getElementById('user-display').innerHTML = `
+          <span class="text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full">
+            👤 ${user.name}
+          </span>
+        `;
+      }
+    });
+
+    function handleReceiptSelected() {
+      // Seed default mock items simulating Gemini OCR output
+      const defaultReceipt = {
+        roomId: "X7K2",
+        merchant: "The Local Eatery",
+        tax: 5.40,
+        tip: 8.50,
+        items: [
+          { id: 1, name: "Burger", quantity: 1, price: 18.00, claims: {} },
+          { id: 2, name: "Truffle Fries", quantity: 1, price: 9.00, claims: {} },
+          { id: 3, name: "Draft Beer", quantity: 3, price: 8.00, claims: {} },
+          { id: 4, name: "Spinach Dip", quantity: 1, price: 16.00, claims: {} }
+        ]
+      };
+      localStorage.setItem('currentReceipt', JSON.stringify(defaultReceipt));
+      window.location.href = "verify.html";
+    }
+
+    function joinRoom() {
+      const code = document.getElementById('room-input').value.trim().toUpperCase();
+      if (code.length < 4) {
+        alert('Please enter a 4-letter room code.');
+        return;
+      }
+      
+      // Ensure a mock receipt exists if testing as a guest
+      if (!localStorage.getItem('currentReceipt')) {
+        handleReceiptSelected();
+      }
+      
+      localStorage.setItem('activeRoomCode', code);
+      window.location.href = "claim.html";
+    }
+  </script>
+</body>
+</html>
